@@ -1,0 +1,48 @@
+policy_module(custom_app, 0.0.1)
+########################################
+#
+# Declarations
+#
+
+gen_require(`
+    type sysadm_t;
+    type container_runtime_t;
+    type fs_t;
+    type spc_t;
+')
+
+attribute_role app_roles;
+roleattribute system_r app_roles;
+
+type app_t;
+type app_exec_t;
+type app_config_t;
+type app_data_t;
+
+application_domain(app_t, app_exec_t, app_config_t, app_data_t)
+
+role app_roles types app_t;
+
+########################################
+#
+# Local policy
+#
+#denied  { relabelto } for  pid=32716 comm="chcon" name="ssl" dev="dm-1" ino=11738 scontext=root:sysadm_r:sysadm_t:s0 tcontext=system_u:object_r:app_data_t:s0:c0.c1023 tclass=dir
+allow sysadm_t { app_data_t app_config_t }:{ dir file } { relabelto relabelfrom };
+
+#denied  { getattr } for  pid=28734 comm="dockerd" path="/app/docker/deluge" dev="dm-1" ino=9895 scontext=system_u:system_r:container_runtime_t:s0-s15:c0.c1023 tcontext=system_u:object_r:app_data_t:s0-s15:c0.c1023 tclass=dir
+allow container_runtime_t { app_data_t app_config_t }: { dir file } { getattr };
+
+#denied  { associate } for  pid=1056 comm="chcon" name="deluge" dev="dm-1" ino=9895 scontext=system_u:object_r:app_data_t:s0:c0.c1023 tcontext=system_u:object_r:fs_t:s0 tclass=filesystem
+allow app_data_t fs_t: filesystem { associate };
+#
+allow app_t app_exec_t: process { execstack execmem };
+allow {sysadm_t spc_t app_exec_t} app_config_t: file { read getattr lock unlink link open };
+allow {sysadm_t spc_t app_exec_t} app_data_t: file { ioctl read write create getattr setattr lock append unlink link rename execute execmod open };
+allow {sysadm_t spc_t app_exec_t} app_data_t: dir { search add_name remove_name read write create getattr setattr lock append unlink link rename execute execmod open };
+
+userdom_use_inherited_user_terminals(app_t)
+
+optional_policy(`
+    unconfined_domain(app_t)
+')

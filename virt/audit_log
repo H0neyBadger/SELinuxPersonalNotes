@@ -1,0 +1,7 @@
+----
+type=PROCTITLE msg=audit(04/07/2018 08:09:55.843:32386) : proctitle=/usr/sbin/libvirtd 
+type=SYSCALL msg=audit(04/07/2018 08:09:55.843:32386) : arch=x86_64 syscall=setxattr success=no exit=EPERM(Operation not permitted) a0=0x7fcb70006010 a1=0x7fcba523af8a a2=0x7fcb700060b0 a3=0x2c items=0 ppid=1 pid=1278 auid=unset uid=root gid=root euid=root suid=root fsuid=root egid=root sgid=root fsgid=root tty=(none) ses=unset comm=libvirtd exe=/usr/sbin/libvirtd subj=system_u:system_r:virtd_t:s0-s15:c0.c1023 key=(null) 
+type=SELINUX_ERR msg=audit(04/07/2018 08:09:55.843:32386) : op=security_validate_transition seresult=denied oldcontext=system_u:object_r:qemu_var_run_t:s0 newcontext=system_u:object_r:virt_image_t:s0:c290,c386 taskcontext=system_u:system_r:virtd_t:s0-s15:c0.c1023 tclass=dir 
+type=AVC msg=audit(04/07/2018 08:09:55.843:32386) : avc:  denied  { relabelto } for  pid=1278 comm=libvirtd name=domain-1-fedora_server dev="dm-1" ino=806710 scontext=system_u:system_r:virtd_t:s0-s15:c0.c1023 tcontext=system_u:object_r:virt_image_t:s0:c290,c386 tclass=dir 
+type=AVC msg=audit(04/07/2018 08:09:55.843:32386) : avc:  denied  { relabelfrom } for  pid=1278 comm=libvirtd name=domain-1-fedora_server dev="dm-1" ino=806710 scontext=system_u:system_r:virtd_t:s0-s15:c0.c1023 tcontext=system_u:object_r:qemu_var_run_t:s0 tclass=dir 
+----

@@ -1,0 +1,9 @@
+policy_module(custom_git, 0.0.1)
+
+gen_require(`
+    #type git_user_content_t;
+    type staff_t;
+')
+
+mls_file_read_to_clearance(staff_t)
+mls_file_write_to_clearance(staff_t)

@@ -1,0 +1,12 @@
+policy_module(custom_container, 0.0.1)
+
+gen_require(`
+        type container_runtime_t;
+	type container_share_t;
+')
+
+# allow wsgi apache socket
+allow container_runtime_t container_share_t:sock_file { create setattr getattr unlink };
+
+mls_file_write_to_clearance(container_share_t);
+mls_file_read_to_clearance(container_share_t);

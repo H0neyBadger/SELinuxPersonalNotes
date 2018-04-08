@@ -1,0 +1,55 @@
+
+module custom_gnome 1.0;
+
+require {
+	type NetworkManager_etc_t;
+	type kernel_t;
+	type systemd_hwdb_etc_t;
+	type xguest_wm_t;
+	type pulseaudio_t;
+	type mplayer_exec_t;
+	type xguest_t;
+	type xserver_t;
+	type xguest_dbusd_t;
+	class process { noatsecure rlimitinh siginh };
+	class unix_stream_socket { getattr read write };
+	class file { execute getattr open read };
+	class lnk_file read;
+	class unix_dgram_socket sendto;
+	class dir { getattr read search };
+	class dbus { acquire_svc send_msg } ;
+}
+
+#avc:  denied  { acquire_svc } for service=org.gnome.Shell spid=2157 scontext=xguest_u:xguest_r:xguest_wm_t:s0 tcontext=xguest_u:xguest_r:xguest_dbusd_t:s0 tclass=dbus
+allow xguest_wm_t xguest_dbusd_t:dbus { acquire_svc send_msg };
+
+#============= pulseaudio_t ==============
+allow pulseaudio_t xguest_t:unix_stream_socket { read write };
+
+#============= xguest_t ==============
+allow xguest_t xguest_wm_t:process { noatsecure rlimitinh siginh };
+
+#============= xguest_wm_t ==============
+allow xguest_wm_t NetworkManager_etc_t:dir { getattr read search };
+
+#!!!! The file '/run/systemd/journal/socket' is mislabeled on your system.  
+#!!!! Fix with $ restorecon -R -v /run/systemd/journal/socket
+allow xguest_wm_t kernel_t:unix_dgram_socket sendto;
+allow xguest_wm_t mplayer_exec_t:file execute;
+allow xguest_wm_t pulseaudio_t:process { noatsecure rlimitinh siginh };
+allow xguest_wm_t systemd_hwdb_etc_t:file { getattr open read };
+allow xguest_wm_t xguest_t:dir search;
+allow xguest_wm_t xguest_t:file read;
+allow xguest_wm_t xguest_t:lnk_file read;
+allow xguest_wm_t xguest_t:process { noatsecure rlimitinh siginh };
+allow xguest_wm_t xguest_t:unix_stream_socket { getattr read write };
+
+#============= xserver_t ==============
+allow xserver_t xguest_wm_t:dir search;
+allow xserver_t xguest_wm_t:file { read open };
+allow xserver_t xguest_wm_t:lnk_file read;
+
+
+#type=PROCTITLE msg=audit(03/30/2018 22:01:44.000:9575226) : proctitle=/usr/sbin/abrtd -d -s 
+type=SYSCALL msg=audit(03/30/2018 22:01:44.000:9575226) : arch=x86_64 syscall=symlinkat success=no exit=EACCES(Permission denied) a0=0x7ffcedfbba40 a1=0xc a2=0x7fb2a17719d2 a3=0x0 items=0 ppid=1 pid=848 auid=unset uid=root gid=root euid=root suid=root fsuid=root egid=root sgid=root fsgid=root tty=(none) ses=unset comm=abrtd exe=/usr/sbin/abrtd subj=system_u:system_r:init_t:s0-s15:c0.c1023 key=(null) 
+type=AVC msg=audit(03/30/2018 22:01:44.000:9575226) : avc:  denied  { create } for  pid=848 comm=abrtd name=.lock scontext=system_u:system_r:init_t:s0-s15:c0.c1023 tcontext=system_u:object_r:var_spool_t:s0 tclass=lnk_file

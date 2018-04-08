@@ -1,0 +1,35 @@
+policy_module(custom_virt, 0.0.1)
+
+# https://bugzilla.redhat.com/show_bug.cgi?id=1558121#c2
+
+gen_require(`
+    type virtd_t;
+    type qemu_var_run_t;
+    type virt_image_t;
+    type virtlogd_t;
+')
+
+# type=SELINUX_ERR msg=audit(04/07/2018 08:52:14.344:34391) : 
+# op=security_validate_transition 
+# seresult=denied 
+# oldcontext=system_u:object_r:qemu_var_run_t:s0 
+# newcontext=system_u:object_r:virt_image_t:s0:c92,c644 
+# taskcontext=system_u:system_r:virtd_t:s0-s15:c0.c1023 
+# tclass=dir
+
+ifdef(`enable_mls',`
+    mls_file_upgrade(virtd_t)
+')
+
+allow virtd_t qemu_var_run_t:dir relabelfrom;
+allow virtd_t virt_image_t:dir relabelto;
+
+# ERROR    Failed to recv file descriptor: Permission denied
+# Removing disk 'fedora_server.img'
+
+ifdef(`enable_mls',`
+    mls_file_write_to_clearance(virtd_t)
+')
+
+allow virtd_t virt_image_t:dir rmdir;
+allow virtd_t virtlogd_t:fifo_file write;
