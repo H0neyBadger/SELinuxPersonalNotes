@@ -1,0 +1,9 @@
+policy_module(custom_user_app, 0.0.1)
+
+# demo: how to use app template
+gen_require(`
+    role user_r;
+')
+
+user_app_template(custom_user, user_r);
+

@@ -1,0 +1,39 @@
+#######################################
+## <summary>
+## The per role template for the generic application module.
+## </summary>
+## <desc>
+## <p>
+## This template creates a derived domains which are used
+## for user applications.
+## </p>
+## </desc>
+## <param name="application_prefix">
+## <summary>
+## The prefix of the foo domain (e.g., foo
+## is the prefix for foo_t).
+## </summary>
+## </param>
+## <param name="user_role">
+## <summary>
+## The role associated with the user domain.
+## </summary>
+## </param>
+#
+template(`user_app_template',`
+    # derivate types from app name
+    type $1_app_t;
+    type $1_app_exec_t;
+    # create domain
+    domain_type($1_app_t)
+    # create entry point
+    domain_entry_file($1_app_t, $1_app_exec_t)
+    init_daemon_domain($1_app_t, $1_app_exec_t) 
+    role $2 types $1_app_t;
+    
+    # sebool
+    #bool allow_unconfined_$1 false;
+    #if (allow_unconfined_$1) {
+        #unconfined_domain($1_app_t)
+    #}
+')
