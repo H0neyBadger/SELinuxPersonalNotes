@@ -1,0 +1,14 @@
+---
+# vars file for selinux_polyinstantiation
+
+se_ns_map:
+  mls: "level"
+  targeted: "context"
+
+se_type: "targeted"
+ns_method: "{{ se_ns_map[se_type] }}"
+
+# comma separated list of user'uid 
+ns_exclude_users: "root,h0neybadger"
+ns_exclude_home: "{{ ns_exclude_users }}"
+

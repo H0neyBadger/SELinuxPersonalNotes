@@ -1,0 +1,57 @@
+---
+# tasks file for selinux_polyinstantiation
+
+- name: "Install mls policy packages"
+  command: "dnf install -y selinux-policy-mls.noarch"
+  become: true
+  when: se_type == 'mls'
+
+- name: "Set selinux config"
+  lineinfile:
+    path: /etc/selinux/config
+    regexp: '^SELINUX='
+    line: 'SELINUX=permissive'
+  become: true
+
+- name: "Set selinux type"
+  lineinfile:
+    path: /etc/selinux/config
+    regexp: '^SELINUXTYPE='
+    line: 'SELINUXTYPE={{ se_type }}'
+  become: true
+
+# mkdir --mode 000 /tmp-inst
+# mkdir --mode 000 /var/tmp/tmp-inst
+
+- name: "Set tmp folders"
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 000
+  with_items:
+    - '/tmp-inst'
+    - '/var/tmp/tmp-inst'
+  become: true
+
+- name: "Configure namespace.conf"
+  blockinfile:
+    path: /etc/security/namespace.conf
+    block: |
+      /tmp     /tmp-inst/            {{ ns_method }}      {{ ns_exclude_users }}
+      /var/tmp /var/tmp/tmp-inst/    {{ ns_method }}      {{ ns_exclude_users }}
+      $HOME    $HOME/$USER.inst/     {{ ns_method }}      {{ ns_exclude_home }}
+  become: true
+
+- name: "Enable selinux fix contexts on boot"
+  command: 'fixfiles -F onboot'
+  become: true 
+
+# 
+# TODO Reboot computer
+#
+
+- name: "Set polyinstantiation bool"
+  command: 'setsebool -P polyinstantiation_enabled 1'
+  become: true
+
+# TODO semanage login
