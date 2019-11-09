@@ -1,0 +1,14 @@
+policy_module(test_setexeccon, 1.0.0)
+
+gen_require(`
+    role unconfined_r;
+    type unconfined_t;
+    class process transition;
+')
+
+type test_setexeccon_exec_t;
+type test_setexeccon_t;
+
+role unconfined_r types test_setexeccon_t;
+allow unconfined_t test_setexeccon_t: process transition;
+
